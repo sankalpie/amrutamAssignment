@@ -8,9 +8,11 @@ const MissedNotificationButton = () => {
     };
 
     return (
-        <button onClick={handleNotify} style={{ padding: '10px', backgroundColor: '#0073e6', color: 'white' }}>
+        <div style={{display:'flex',flexDirection:'row',justifyContent:'center',alignItems:'center'}}>
+        <button onClick={handleNotify} style={{ padding: '10px', backgroundColor: '#0073e6', color: 'white', marginBottom:'20px'}}>
             Notify Missed Appointments
         </button>
+        </div>
     );
 };
 

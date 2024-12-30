@@ -5,7 +5,7 @@ import MissedNotificationButton from './components/MissedNotificationButton';
 
 const App = () => (
     <div>
-        <h1>Appointment Management</h1>
+        <h1 style={{textAlign:'center'}}>Appointment Management Amrutam</h1>
         <AppointmentList />
         <MissedNotificationButton />
         <RescheduleForm />
