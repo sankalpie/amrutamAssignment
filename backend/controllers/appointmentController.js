@@ -1,26 +1,5 @@
 const Appointment = require('../models/appointmentModel');
-const { sendNotification } = require('../utils/notificationService');
-const { resolveConflicts } = require('../utils/conflictResolver');
 const nodemailer = require('nodemailer');
-
-exports.detectMissedAppointments = async (req, res) => {
-    try {
-        const now = new Date();
-        const missedAppointments = await Appointment.find({
-            dateTime: { $lt: new Date(now - 15 * 60000) },
-            status: 'Scheduled',
-        });
-
-        for (const appt of missedAppointments) {
-            appt.status = 'Missed';
-            await appt.save();
-        }
-
-        res.status(200).json({ message: 'Missed appointments updated.', missedAppointments });
-    } catch (error) {
-        res.status(500).json({ message: 'Error detecting missed appointments.', error });
-    }
-};
 
 exports.notifyMissedAppointments = async (req, res) => {
     try {
@@ -31,7 +10,7 @@ exports.notifyMissedAppointments = async (req, res) => {
                 pass: process.env.EMAIL_PASS,
             },
         });
-        
+
         const now = new Date();
         // console.log(now);
         const missedAppointments = await Appointment.find({
@@ -68,24 +47,28 @@ exports.rescheduleAppointment = async (req, res) => {
 
     if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
 
-    const isConflict = await resolveConflicts(appointment.doctorId, newDateTime);
+    const isConflict= await Appointment.findOne({doctorId:appointment.doctorId,dateTime:newDateTime}); //// finds if there is already a booking for the users current doctor at the time that the user has newly selected
     if (isConflict) return res.status(400).json({ message: 'Time slot unavailable' });
 
     appointment.dateTime = newDateTime;
     appointment.status = 'Rescheduled';
     await appointment.save();
-    sendNotification(appointment, 'Your appointment has been rescheduled.');
+
+    const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: appointment.patientEmail,
+        subject: 'Appointment Notification',
+        text: "Your appointment has been rescheduled.",
+    };
+    await transporter.sendMail(mailOptions);
 
     res.status(200).json({ message: 'Appointment rescheduled successfully' });
-};
-
-exports.getAvailableSlots = async (req, res) => {
-    const { doctorId } = req.params;
-    const now = new Date();
-    const appointments = await Appointment.find({ doctorId, dateTime: { $gte: now } });
-
-    const bookedSlots = appointments.map((appt) => appt.dateTime);
-    const availableSlots = generateSlots(now).filter((slot) => !bookedSlots.includes(slot));
-
-    res.status(200).json({ availableSlots });
 };

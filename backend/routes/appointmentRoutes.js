@@ -1,5 +1,5 @@
 const express = require('express');
-const { detectMissedAppointments, rescheduleAppointment, getAvailableSlots,notifyMissedAppointments } = require('../controllers/appointmentController');
+const {  rescheduleAppointment, notifyMissedAppointments } = require('../controllers/appointmentController');
 const router = express.Router();
 
 // Route to fetch all appointments
@@ -13,9 +13,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.get('/detect-missed', detectMissedAppointments);
 router.post('/reschedule', rescheduleAppointment);
-router.get('/available-slots/:doctorId', getAvailableSlots);
 
 // Send notifications for missed appointments
 router.post('/notify-missed', notifyMissedAppointments);
