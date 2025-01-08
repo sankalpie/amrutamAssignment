@@ -48,6 +48,7 @@ exports.rescheduleAppointment = async (req, res) => {
     if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
 
     const isConflict= await Appointment.findOne({doctorId:appointment.doctorId,dateTime:newDateTime}); //// finds if there is already a booking for the users current doctor at the time that the user has newly selected
+    (isConflict)?(isConflict=true):(isConflict=false);
     if (isConflict) return res.status(400).json({ message: 'Time slot unavailable' });
 
     appointment.dateTime = newDateTime;
