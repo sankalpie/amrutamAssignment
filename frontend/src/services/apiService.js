@@ -1,4 +1,4 @@
-const API_URL = 'https://amrutamassignment-rmfk.onrender.com/api/appointments';
+const API_URL = 'http://localhost:5000/api/appointments';
 
 const apiService = {
     // Fetch all appointments
